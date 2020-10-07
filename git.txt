@@ -1,0 +1,92 @@
+个人总结的一点git 常用操作
+ls
+    ls  显示除隐藏文件外的所有文件及目录的名字
+    ls –a 显示当前目录中的所有文件，包含隐藏文件
+    ls –l 显示文件及其详细信息
+pwd(print working directory),查询当前目录
+mkdir(make directories),新建目录
+git config user.name
+git config user.email
+git init为初始化仓库 注：不可在已经初始化的仓库里面初始化仓库
+git status 查看仓库状态
+    如果查看时中文显示乱码,可以修改如下配置
+    git config --global core.quotepath false
+git add 文件名添加到暂存区
+git commit -m 'message'为提交到暂存区
+通过 “git rm 文件名” 删除
+通过"git mv 旧文件 新文件"重命名
+注：所有修改完成后都要git add 后git commit -m'messge'到暂存区
+撤销修改
+	丢弃工作区的修改
+		命令:git checkout -- 文件名
+		注意点
+			该命令让文件回到最近一次git commit或git add时的状态
+			该命令中的--不能省略,省略就变成了“切换到另一个分支”
+	丢弃暂存区的修改
+		命令:git reset HEAD 文件名
+		注意点
+			该命令只是把暂存区的修改撤销掉,工作区的修改还在
+			可以继续通过"git checkout -- 文件名"来撤销工作区的修改
+			HEAD表示当前版本
+	版本回退
+		命令:git reset --hard HEAD或者commit_id
+		注意点
+			"git reset --hard HEAD"表示回退到当前版本,即工作区的内容和最后一次commit的内容一致
+			“git reset --hard commit_id”表示回到commit_id所在的版本
+			--hard的"--"和"hard"中间不能有空格
+			Git的版本回退速度非常快，因为Git在内部有个指向当前版本的HEAD指针，当你回退版本的时候，Git仅仅是改变HEAD指针的指向
+			用HEAD表示当前版本,上一个版本就是HEAD^，上上一个版本就是HEAD^^
+			回退前,用"git log"可以查看提交历史，以便确定要回退到哪个版本
+			如果找不到回退前的commit id,可以用"git reflog"查看命令历史，以便确定哪个版本
+同步远程仓库
+    本地有仓库,同步到GitHub上
+        第一步,在Github上创建一个空仓库
+            注意,Initialize this repository with a README不要选
+        第二步,在本地仓库所在目录添加一个远程仓库
+            命令:git remote add 远程库的名字 远程库的地址
+            举例:git remote add origin https://github.com/kuazhu/test.git
+            注意点
+                origin是远程库的名字，这是Git默认的叫法，也可以改成别的，但是origin这个名字一看就知道是远程库
+                https://github.com/kuazhu/test.git 是远程库的地址,github地址分为https协议和ssh协议两种,如果没有添加ssh的公钥到github上可以使用https协议的地址
+                如果第一次使用,https的地址在推送内容到远程库上时需要输入github的用户名和密码
+        第三步,本地库的内容推送到远程库
+            命令:git push -u 远程库的名字 分支名称
+            举例:git push -u origin master
+            注意点
+                用git push命令，实际上是把当前master分支推送到远程
+                由于远程库是空的，我们第一次推送master分支时，加上了-u参数，Git不但会把本地的master分支内容推送的远程新的master分支，还会把本地的master分支和远程的master分支关联起来,下次推送时用“git push”就可以了
+                远程库的名字就代表了远程仓库的地址,这里也可以直接用远程仓库的地址,如:
+                git push -u https://github.com/kuazhu/test.git master
+    删除远程库
+	    命令:git remote remove 远程库的名字
+	    举例:git remote remove origin
+    查看远程库
+	    命令:git remote -v
+    GitHub上有仓库,同步到本地
+	第一步,在github上创建一个空仓库或者找到需要同步的仓库
+		注意,可以选Initialize this repository with a README
+	第二步,把github上的仓库克隆到本地
+		命令:git clone 远程库地址 本地文件夹名称
+		注意点
+			和在本地添加远程仓库一样,github地址分为https协议和ssh协议两种,如果没有添加ssh的公钥到github上可以使用https协议的地址
+			如果第一次使用,https的地址在推送内容到远程库上时需要输入github的用户名和密码
+			git clone的仓库在本地可以直接用“git push”推送修改到远程仓库
+			本地文件夹名称可以省略,省略时和远程仓库的.git文件同名
+			推荐使用这种方式来新建并管理自己的项目
+团队协作
+    添加开发人员
+        第一步,管理员在远程库创建一个项目仓库
+        第二步,在项目仓库中添加开发人员
+        第三步,开发人员使用git clone把项目克隆到本地
+        注意点
+            以github远程仓库为例,在项目仓库中添加开发人员时,可以是开发人员的ssh公钥,也可以是开发人员的账号
+                添加开发人员的ssh公钥步骤为:项目仓库的主页中的Settings->Deploy keys->Add deploy key
+                添加开发人员的账号步骤为:项目仓库的主页中的Settings->Collaborators
+            开发人员克隆项目时,如果添加的ssh公钥,就用ssh协议的地址,如果添加的账号就用https协议的地址
+            在github中如果项目没有添加开发人员并且也没有在个人设置里添加ssh公钥,只能克隆项目,不能提交项目
+    分支管理
+        分支的基本概念
+	        分支就是一条提交的时间线,HEAD指针指向当前提交,准确的来说应该是HEAD指针指向当前的分支指针,而当前的分支指针才正真指向当前的提交
+	        master分支是主分支,在git初始化仓库的时候会自动创建,一开始master指向最新的提交,HEAD指向master
+	        每次提交,master分支会向前移动一步,HEAD指针也随之移动
+		
